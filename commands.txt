@@ -1,0 +1,15 @@
+sui client call \
+    --package 0xebabdd91d5370fa9893db8ecd578360626e049abba2740bef51efb7cc732b7c3 \
+    --module dashboard \
+    --function create_proposal \
+    --args "Propasal 1" "Propasal description 1" 1786344496 \
+    --gas-budget 100000000 
+
+
+
+
+sui client ptb \
+    --move-call 0xebabdd91d5370fa9893db8ecd578360626e049abba2740bef51efb7cc732b7c3::dashboard::create_proposal \
+    '"Propasal 2"' \
+    '"Propasal description 2"' \
+    1786344496

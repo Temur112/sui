@@ -1,0 +1,1 @@
+export const TEST_NET_PACKAGE_ID = "0xebabdd91d5370fa9893db8ecd578360626e049abba2740bef51efb7cc732b7c3"
