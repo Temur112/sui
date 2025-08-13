@@ -22,7 +22,7 @@ public fun create(
     description: String,
     expiration: u64,
     ctx: &mut TxContext,
-){
+) :ID {
     let proposal: Proposal = Proposal {
         id: object::new(ctx),
         title,
@@ -33,8 +33,12 @@ public fun create(
         creator: ctx.sender(),
         voter_registry: vector::empty(),
     };
+    
 
+    let id = proposal.id.to_inner();
     transfer::share_object(proposal);
+
+    id
 }
 
 public fun title(proposal: &Proposal): String {

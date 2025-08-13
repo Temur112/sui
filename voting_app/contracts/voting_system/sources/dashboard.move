@@ -60,9 +60,19 @@ public fun register_proposal(self: &mut Dashboard, proposal_id: ID) {
 }
 
 
+public fun proposal_ids(self: &Dashboard) : vector<ID>{
+    self.proposal_ids
+}
+
 #[test_only]
 public fun issue_admin_cap(ctx: &mut TxContext) {
     transfer::transfer(AdminCap {id: object::new(ctx)}, ctx.sender());
+}
+
+
+#[test_only]
+public fun new_otw(_ctx: &mut TxContext) :DASHBOARD {
+    DASHBOARD{}
 }
 
 
