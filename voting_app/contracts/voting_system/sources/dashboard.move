@@ -1,4 +1,10 @@
 module voting_system::dashboard;
+use sui::types;
+
+
+// Erroor codes 
+const EDuplicateProposal: u64 = 0;
+const EInvalidOtw: u64 = 1;
 
 // use voting_system::proposal::{create};
 
@@ -15,30 +21,41 @@ public struct Dashboard has key {
 }
 
 
+public struct DASHBOARD has drop {}
 
-fun init(ctx: &mut TxContext){
-    new(ctx);
 
+// Hot potato pattern it can not be stored, copied, discarded
+public struct Potato {}
+
+
+
+fun init(_otw: DASHBOARD, ctx: &mut TxContext){
+
+    new(_otw, ctx);
 
     transfer::transfer(
-        AdminCap {id: object::new(ctx)},
+        AdminCap {id:object::new(ctx)},
         ctx.sender()
     )
 }
 
 
-public fun new(ctx: &mut TxContext) {
+public fun new(_otw:DASHBOARD, ctx: &mut TxContext) {
+
+    assert!(types::is_one_time_witness(&_otw), EInvalidOtw);
+
     let dashboard: Dashboard = Dashboard {
         id: object::new(ctx),
         proposal_ids: vector::empty(),
     };
 
 
-
     transfer::share_object(dashboard);
 }
 
 public fun register_proposal(self: &mut Dashboard, proposal_id: ID) {
+    assert!(!self.proposal_ids.contains(&proposal_id), EDuplicateProposal);
+
     self.proposal_ids.push_back(proposal_id);
 }
 
@@ -57,7 +74,8 @@ fun test_module_init() {
 
     let mut scenario = test_scenario::begin(user);
     {
-        init(scenario.ctx());
+        let otw = DASHBOARD{};
+        init(otw, scenario.ctx());
     };
 
     scenario.next_tx(user);
@@ -72,6 +90,4 @@ fun test_module_init() {
 
 }
 
-
-    
 
