@@ -117,7 +117,7 @@ fun test_register_proposal_as_admin(){
         let proposal_id = new_proposal(&admin_cap, scenario.ctx());
 
 
-        dashboard.register_proposal(proposal_id);
+        dashboard.register_proposal(&admin_cap, proposal_id);
 
         let proposal_ids = dashboard::proposal_ids(&dashboard);
 
