@@ -13,3 +13,26 @@ sui client ptb \
     '"Propasal 2"' \
     '"Propasal description 2"' \
     1786344496
+
+
+sui client ptb \
+--move-call 0x9a6f077fb32bea37f224845063f34075171b8964be1ea8a780d2f9bd20d4afd8::proposal::create \
+@0x9067e1df009e1569b232af5c882e9c71034e2843d26125e9a675b7f51b4218e9 \
+'"Propasal 4"' '"Propasal 4 description"' 1765686546 \
+--assign proposal_id \
+--move-call 0x9a6f077fb32bea37f224845063f34075171b8964be1ea8a780d2f9bd20d4afd8::dashboard::register_proposal \
+@0x0bef28463828e592dc4d2859c3c3e4078e37dee163fcb3f3ee8867c05c3d142e @0x9067e1df009e1569b232af5c882e9c71034e2843d26125e9a675b7f51b4218e9 proposal_id \
+--move-call 0x9a6f077fb32bea37f224845063f34075171b8964be1ea8a780d2f9bd20d4afd8::proposal::create \
+@0x9067e1df009e1569b232af5c882e9c71034e2843d26125e9a675b7f51b4218e9 \
+'"Propasal 2"' '"Propasal 2 description"' 1765686546 \
+--assign proposal_id \
+--move-call 0x9a6f077fb32bea37f224845063f34075171b8964be1ea8a780d2f9bd20d4afd8::dashboard::register_proposal \
+@0x0bef28463828e592dc4d2859c3c3e4078e37dee163fcb3f3ee8867c05c3d142e @0x9067e1df009e1569b232af5c882e9c71034e2843d26125e9a675b7f51b4218e9 proposal_id \
+--move-call 0x9a6f077fb32bea37f224845063f34075171b8964be1ea8a780d2f9bd20d4afd8::proposal::create \
+@0x9067e1df009e1569b232af5c882e9c71034e2843d26125e9a675b7f51b4218e9 \
+'"Propasal 3"' '"Propasal 3 description"' 1765686546 \
+--assign proposal_id \
+--move-call 0x9a6f077fb32bea37f224845063f34075171b8964be1ea8a780d2f9bd20d4afd8::dashboard::register_proposal \
+@0x0bef28463828e592dc4d2859c3c3e4078e37dee163fcb3f3ee8867c05c3d142e @0x9067e1df009e1569b232af5c882e9c71034e2843d26125e9a675b7f51b4218e9 proposal_id \
+ 
+
