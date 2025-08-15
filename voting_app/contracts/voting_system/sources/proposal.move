@@ -41,6 +41,20 @@ public fun create(
     id
 }
 
+
+
+public fun vote(self: &mut Proposal, vote_yes: bool, _ctx: &TxContext){
+    if (vote_yes){
+        self.voted_yes_count = self.voted_yes_count + 1;
+    }else{
+        self.voted_no_count = self.voted_no_count + 1;
+    }
+}
+
+
+
+
+
 public fun title(proposal: &Proposal): String {
     proposal.title
 }

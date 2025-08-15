@@ -3,7 +3,10 @@
 module voting_system::voting_system_tests;
 use voting_system::dashboard::{Self,AdminCap, Dashboard};
 use sui::test_scenario;
-use voting_system::proposal::{Self};
+use voting_system::proposal::{Self, Proposal};
+
+
+const EWrongVoteCount:u64 = 0;
 
 
 
@@ -145,4 +148,44 @@ fun new_proposal(admin_cap: &AdminCap, ctx: &mut TxContext): ID {
     let proposal_id = proposal::create(admin_cap,title, desc, 2000000000, ctx);
 
     proposal_id
+}
+
+
+
+#[test]
+fun test_voting(){
+    let user = @0xB0B;
+    let admin = @0xA01;
+
+    let mut scenario = test_scenario::begin(admin);
+    {
+        dashboard::issue_admin_cap(scenario.ctx());
+    };
+
+    scenario.next_tx(admin);
+    {
+        let admin_cap = scenario.take_from_sender<AdminCap>();
+        new_proposal(&admin_cap, scenario.ctx());
+        test_scenario::return_to_sender(&scenario, admin_cap);
+    };
+
+    scenario.next_tx(user);
+    {
+        let mut proposal = scenario.take_shared<Proposal>();
+        
+        proposal.vote(true, scenario.ctx());
+        proposal.vote(true, scenario.ctx());
+        proposal.vote(false, scenario.ctx());
+
+        assert!(proposal.voted_yes_count() == 2, EWrongVoteCount);
+        assert!(proposal.voted_no_count() == 1, EWrongVoteCount);
+
+
+        test_scenario::return_shared(proposal);
+    };
+
+    scenario.end();
+
+    
+
 }
