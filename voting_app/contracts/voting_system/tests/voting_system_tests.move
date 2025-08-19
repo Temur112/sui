@@ -3,10 +3,11 @@
 module voting_system::voting_system_tests;
 use voting_system::dashboard::{Self,AdminCap, Dashboard};
 use sui::test_scenario;
-use voting_system::proposal::{Self, Proposal};
+use voting_system::proposal::{Self, Proposal, VoteProofNFT, ProposalStatus};
 
 
 const EWrongVoteCount:u64 = 0;
+const EWrongNftUrl:u64 = 1;
 
 
 
@@ -45,7 +46,7 @@ fun test_create_proposal_with_admin_cap(){
         assert!(created_proposal.voted_no_count() == 0);
         assert!(created_proposal.expiration() == 2000000000);
         assert!(created_proposal.creator() == user);
-        assert!(created_proposal.voter_registry().is_empty());
+        assert!(created_proposal.voters().is_empty());
 
         test_scenario::return_shared(created_proposal);
     };
@@ -90,7 +91,7 @@ fun test_create_proposal_no_admin_cap(){
         assert!(created_proposal.voted_no_count() == 0);
         assert!(created_proposal.expiration() == 2000000000);
         assert!(created_proposal.creator() == user);
-        assert!(created_proposal.voter_registry().is_empty());
+        assert!(created_proposal.voters().is_empty());
 
         test_scenario::return_shared(created_proposal);
     };
@@ -154,7 +155,8 @@ fun new_proposal(admin_cap: &AdminCap, ctx: &mut TxContext): ID {
 
 #[test]
 fun test_voting(){
-    let user = @0xB0B;
+    let user1 = @0xB0B;
+    let user2 = @0xA23;
     let admin = @0xA01;
 
     let mut scenario = test_scenario::begin(admin);
@@ -169,23 +171,136 @@ fun test_voting(){
         test_scenario::return_to_sender(&scenario, admin_cap);
     };
 
-    scenario.next_tx(user);
+    scenario.next_tx(user1);
     {
         let mut proposal = scenario.take_shared<Proposal>();
         
         proposal.vote(true, scenario.ctx());
+
+        assert!(proposal.voted_yes_count() == 1, EWrongVoteCount);
+
+
+        test_scenario::return_shared(proposal);
+    };
+
+
+        scenario.next_tx(user2);
+    {
+        let mut proposal = scenario.take_shared<Proposal>();
+        
         proposal.vote(true, scenario.ctx());
-        proposal.vote(false, scenario.ctx());
+
 
         assert!(proposal.voted_yes_count() == 2, EWrongVoteCount);
-        assert!(proposal.voted_no_count() == 1, EWrongVoteCount);
+        assert!(proposal.voted_no_count() == 0, EWrongVoteCount);
 
 
         test_scenario::return_shared(proposal);
     };
 
     scenario.end();
+}
+
+
+
+#[test]
+#[expected_failure(abort_code = voting_system::proposal::EDuplicateVote)]
+fun test_error_duplcate_votingvoting(){
+    let user1 = @0xB0B;
+    let admin = @0xA01;
+
+    let mut scenario = test_scenario::begin(admin);
+    {
+        dashboard::issue_admin_cap(scenario.ctx());
+    };
+
+    scenario.next_tx(admin);
+    {
+        let admin_cap = scenario.take_from_sender<AdminCap>();
+        new_proposal(&admin_cap, scenario.ctx());
+        test_scenario::return_to_sender(&scenario, admin_cap);
+    };
+
+    scenario.next_tx(user1);
+    {
+        let mut proposal = scenario.take_shared<Proposal>();
+        
+        proposal.vote(true, scenario.ctx());
+        proposal.vote(true, scenario.ctx());
+
+
+        test_scenario::return_shared(proposal);
+    };
+
+    scenario.end();
+}
+
+
+#[test]
+fun test_issue_vote_proof(){
+    let user1 = @0xB0B;
+    let admin = @0xA01;
+
+    let mut scenario = test_scenario::begin(admin);
+    {
+        dashboard::issue_admin_cap(scenario.ctx());
+    };
+
+    scenario.next_tx(admin);
+    {
+        let admin_cap = scenario.take_from_sender<AdminCap>();
+        new_proposal(&admin_cap, scenario.ctx());
+        test_scenario::return_to_sender(&scenario, admin_cap);
+    };
 
     
+    scenario.next_tx(user1);
+    {
+        let mut proposal = scenario.take_shared<Proposal>();
+        
+        proposal.vote(true, scenario.ctx());
 
+
+        test_scenario::return_shared(proposal);
+    };
+
+
+    scenario.next_tx(user1);
+    {
+        let vote_proof = scenario.take_from_sender<VoteProofNFT>();
+
+        assert!(vote_proof.vote_proof_nft().inner_url() == b"https://singforamoment.sirv.com/nft_yes.png".to_ascii_string(), EWrongNftUrl);
+        
+        test_scenario::return_to_sender(&scenario, vote_proof);
+    };
+
+    scenario.end();
+}
+
+
+#[test]
+fun test_change_proposal_status(){
+    let admin: = @0xA01;
+
+    let mut scenario = test_scenario::begin(admin);
+    {
+        dashboard::issue_admin_cap(scenario.ctx());
+    };
+
+    scenario.next_tx(admin);
+    {
+        let admin_cap = scenario.take_from_sender<AdminCap>();
+        new_proposal(&admin_cap, scenario.ctx());
+        test_scenario::return_to_sender(&scenario, &admin_cap);
+    };
+
+    scenario.next_tx(admin);
+    {
+        let proposal = scenario.take_shared<Proposal>();
+
+        assert!(proposal.status) == Proposal::Active;
+
+    };
+
+    scenario.end()
 }
